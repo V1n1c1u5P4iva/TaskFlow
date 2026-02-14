@@ -6,6 +6,7 @@
 
 > 🚧 **Atenção:** Este projeto ainda está **em execução** e desenvolvimento contínuo. Algumas funcionalidades podem estar incompletas ou sujeitas a alterações.
 
+
 ## 📂 Estrutura do Projeto
 
 O sistema é composto por dois módulos principais:
