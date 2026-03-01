@@ -1,30 +1,43 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
+from typing import Optional, Any
+from urllib.parse import quote_plus
+from pathlib import Path
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # aponta para taskflow-backend/
+load_dotenv(BASE_DIR / ".env")
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "TaskFlow AI API"
     PROJECT_VERSION: str = "1.0.0"
-    
-    MYSQL_HOST: str = "127.0.0.1"
-    MYSQL_PORT: str = "3306"
-    MYSQL_USER: str = "root"
-    MYSQL_PASSWORD: str = ""
-    MYSQL_DATABASE: str = "taskflow_db"
-    
-    SECRET_KEY: str = "sua_chave_secreta_super_segura_123"
+
+    DATABASE_URL: Optional[str] = None
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
+
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DATABASE: str
+
+    FRONTEND_URL: str
     GEMINI_API_KEY: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(BASE_DIR / ".env"),
         case_sensitive=True,
         extra="ignore"
     )
 
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}?charset=utf8mb4"
+    def model_post_init(self, __context: Any) -> None: 
+        if not self.DATABASE_URL:
+            password = quote_plus(self.POSTGRES_PASSWORD) if self.POSTGRES_PASSWORD else ""
+            auth = f"{self.POSTGRES_USER}:{password}" if password else self.POSTGRES_USER
+            self.DATABASE_URL = (
+                f"postgresql+psycopg2://{auth}"
+                f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DATABASE}"
+            )
 
-settings = Settings()
+settings = Settings()   # type: ignore
