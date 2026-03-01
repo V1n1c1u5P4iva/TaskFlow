@@ -86,6 +86,14 @@ class ApiService {
 
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
+      if (response.status === 401) {
+        // Token expirado ou inválido — limpa sessão e redireciona para login
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+      }
       const error: ApiError = await response.json().catch(() => ({
         detail: 'Erro ao processar requisição'
       }));

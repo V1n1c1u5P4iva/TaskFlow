@@ -6,16 +6,18 @@ import uvicorn
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="API para gerenciamento de tarefas com IA - MySQL Backend (Modular)",
+    description="API para gerenciamento de tarefas com IA - PostgreSQL Backend (Modular)",
     version=settings.PROJECT_VERSION,
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
 # Configuração CORS
+allowed_origins = [settings.FRONTEND_URL] if settings.FRONTEND_URL else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Permite todas as origens para facilitar desenvolvimento
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,23 +40,23 @@ async def startup_event():
         from app.core.database import engine, Base
         Base.metadata.create_all(bind=engine)
         
-        print("✅ Banco de dados MySQL iniciado com sucesso!")
+        print("✅ Banco de dados PostgreSQL iniciado com sucesso!")
     except Exception as e:
         print(f"❌ Erro ao iniciar banco de dados: {e}")
-        print("⚠️  Verifique se o MySQL está rodando e se as credenciais em .env estão corretas")
+        print("⚠️  Verifique se o PostgreSQL está rodando e se as credenciais em .env estão corretas")
 
 @app.get("/")
 def read_root():
     return {
-        "message": "TaskFlow AI API - Running with MySQL (Modular Structure)",
+        "message": "TaskFlow AI API - Running with PostgreSQL (Modular Structure)",
         "version": settings.PROJECT_VERSION,
         "docs": "/docs",
-        "database": "MySQL"
+        "database": "PostgreSQL"
     }
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "database": "MySQL"}
+    return {"status": "healthy", "database": "PostgreSQL"}
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

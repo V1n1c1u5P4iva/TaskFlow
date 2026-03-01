@@ -1,17 +1,21 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 from app.core.config import settings
+from typing import cast
 
-print(f"[DEBUG] Connecting to database at {settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}")
+database_url = settings.DATABASE_URL
+if not database_url:
+    raise ValueError("DATABASE_URL precisa estar definido antes de criar o engine.")
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    cast(str, database_url),
     pool_pre_ping=True,
     pool_recycle=3600,
-    echo=False
+    echo=False,
+    connect_args={"options": "-csearch_path=taskflow"},
 )
 
+print(f"Conectando ao banco de dados em: {settings.DATABASE_URL}")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
