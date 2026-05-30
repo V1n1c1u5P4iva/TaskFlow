@@ -4,9 +4,19 @@ import { theme } from "@/styles/theme";
 import { LayoutDashboard, CheckSquare, Settings, LogOut, Calendar, Sparkles, Brain } from "lucide-react";
 import { SidebarLink } from "../ui/SidebarLink";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { auth } from "@/lib/auth";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    setUser(auth.getUser());
+    const handleUserUpdated = () => setUser(auth.getUser());
+    window.addEventListener("userUpdated", handleUserUpdated);
+    return () => window.removeEventListener("userUpdated", handleUserUpdated);
+  }, []);
   
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -43,12 +53,43 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ padding: "20px", borderTop: `1px solid var(--border)` }}>
+        {user && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "12px",
+            marginBottom: "8px",
+            borderRadius: "10px",
+            background: "var(--background)"
+          }}>
+            <div style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              background: `${theme.colors.primary}20`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: theme.colors.primary,
+              fontWeight: 700,
+              fontSize: "15px",
+              flexShrink: 0
+            }}>
+              {user.nome?.charAt(0).toUpperCase()}
+            </div>
+            <div style={{ overflow: "hidden" }}>
+              <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--foreground)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {user.nome}
+              </p>
+              <p style={{ fontSize: "12px", color: "var(--text-light)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
         <button 
-          onClick={() => {
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("user");
-            window.location.href = "/login";
-          }}
+          onClick={() => auth.logout()}
           style={{
             display: "flex",
             alignItems: "center",

@@ -93,3 +93,14 @@ def update_profile(
         "token_type": "bearer",
         "user": current_user
     }
+
+@router.get("/me")
+def get_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "nome": current_user.nome,
+        "email": current_user.email,
+        "idade": current_user.idade,
+        "genero": current_user.genero,
+        "ocupacao": current_user.ocupacao,
+    }

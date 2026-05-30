@@ -28,22 +28,28 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["Tasks"])
 app.include_router(ai.router, prefix="/api/ai", tags=["AI"])
 
-@app.on_event("startup")
-async def startup_event():
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """Inicializar banco de dados ao iniciar a aplicação"""
     print("🚀 Iniciando TaskFlow AI API (Modular)...")
     try:
-        # Importar modelos para garantir que sejam registrados no Base
         from app.models import user, task
-        
-        # Criar tabelas
         from app.core.database import engine, Base
-        Base.metadata.create_all(bind=engine)
+        from sqlalchemy import text
         
+        # Garante que o schema taskflow existe
+        with engine.connect() as conn:
+            conn.execute(text("CREATE SCHEMA IF NOT EXISTS taskflow"))
+            conn.commit()
+        
+        Base.metadata.create_all(bind=engine)
         print("✅ Banco de dados PostgreSQL iniciado com sucesso!")
     except Exception as e:
         print(f"❌ Erro ao iniciar banco de dados: {e}")
-        print("⚠️  Verifique se o PostgreSQL está rodando e se as credenciais em .env estão corretas")
+        print("⚠️  Verifique se o PostgreSQL está rodando e as credenciais em .env estão corretas")
+    yield
 
 @app.get("/")
 def read_root():

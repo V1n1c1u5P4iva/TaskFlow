@@ -15,7 +15,6 @@ engine = create_engine(
     connect_args={"options": "-csearch_path=taskflow"},
 )
 
-print(f"Conectando ao banco de dados em: {settings.DATABASE_URL}")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
