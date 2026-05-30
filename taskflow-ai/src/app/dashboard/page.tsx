@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -21,6 +22,12 @@ export default function DashboardPage() {
   const [aiInsight, setAiInsight] = useState<any>(null);
   const { addToast } = useToast();
   const router = useRouter();
+  const [userName, setUserName] = useState<string>("Usuário");
+
+  useEffect(() => {
+    const user = auth.getUser();
+    if (user?.nome) setUserName(user.nome.split(" ")[0]);
+  }, []);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -154,7 +161,7 @@ export default function DashboardPage() {
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         
         <PageHeader 
-          title="Olá, Vinicius"
+          title={`Olá, ${userName}`}
           subtitle="Aqui estão suas tarefas de hoje"
           emoji="👋"
         />

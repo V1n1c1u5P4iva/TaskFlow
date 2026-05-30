@@ -80,10 +80,12 @@ export default function SettingsPage() {
       
       localStorage.setItem("user", JSON.stringify(response.user));
       setUserData(response.user);
-      alert(t('save', currentLang) + " " + "com sucesso!");
+      // Profile saved successfully - reload sidebar user info
+      window.dispatchEvent(new Event("userUpdated"));
+      alert("✅ " + t('save', currentLang) + " com sucesso!");
     } catch (err) {
       console.error(err);
-      alert("Erro ao atualizar perfil");
+      alert("❌ Erro ao atualizar perfil. Tente novamente.");
     } finally {
       setIsLoading(false);
     }

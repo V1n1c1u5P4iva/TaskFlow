@@ -4,10 +4,18 @@ import { theme } from "@/styles/theme";
 import { Bell, User, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { auth } from "@/lib/auth";
 
 export default function Header() {
   const { theme: currentTheme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const user = auth.getUser();
+    if (user?.nome) setUserName(user.nome.split(" ")[0]);
+  }, []);
 
   const getPageTitle = () => {
     switch (pathname) {
@@ -55,6 +63,26 @@ export default function Header() {
         <button style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-light)" }}>
           <Bell size={20} />
         </button>
+
+        {userName && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: `${theme.colors.primary}20`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: theme.colors.primary,
+              fontWeight: 700,
+              fontSize: "14px"
+            }}>
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--foreground)" }}>{userName}</span>
+          </div>
+        )}
       </div>
     </header>
   );

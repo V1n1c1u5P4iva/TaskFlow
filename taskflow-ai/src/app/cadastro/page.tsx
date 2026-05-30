@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { api, RegisterData } from "@/lib/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getCurrentLanguage, t, genderOptions, occupationOptions, Language } from "@/lib/i18n";
+import { auth } from "@/lib/auth";
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -28,8 +29,12 @@ export default function CadastroPage() {
   });
 
   useEffect(() => {
+    if (auth.isAuthenticated()) {
+      router.replace("/dashboard");
+      return;
+    }
     setCurrentLang(getCurrentLanguage());
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
